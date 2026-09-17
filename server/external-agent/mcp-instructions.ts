@@ -5,7 +5,7 @@ export function mcpServerInstructions(
   exposureMode: McpToolExposureMode,
 ): string {
   return [
-    `OpenChatCut external skill baseline: ${skillBaseline}. Update with npx skills update openchatcut when the installed skill is older.`,
+    `cut000 external skill baseline: ${skillBaseline}. Update with npx skills update openchatcut when the installed skill is older.`,
     'Bind this MCP transport with target_project before editing. A connected browser is preferred; an existing stored project can use the offline fallback when no browser owns it.',
     'The target response and openchatcut_status report bindingMode. Offline bindings expose only server-direct data tools and require approvalMode="auto".',
     exposureMode === 'progressive'

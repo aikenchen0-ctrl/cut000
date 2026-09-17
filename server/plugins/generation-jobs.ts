@@ -2,11 +2,11 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 import { TERMINAL } from './generation-job-types.ts';
 import type { GenerationJob } from './generation-job-types.ts';
-import { jobs } from './generation-job-store.ts';
 import {
   initializeGenerationJobs,
   resumeGenerationJobDownload,
   resumeRestoredJobs,
+  visibleGenerationJob,
 } from './generation-job-lifecycle.ts';
 
 export {
@@ -137,7 +137,7 @@ export function generationProgressPlugin(): Plugin {
           if (input.action === 'wait') {
             const deadline = Date.now() + timeoutSeconds * 1000;
             while (Date.now() < deadline) {
-              const known = jobIds.map((id) => jobs.get(id));
+              const known = jobIds.map((id) => visibleGenerationJob(id));
               if (known.every((job) => !job || TERMINAL.has(job.status))) break;
               await wait(250);
             }
@@ -145,7 +145,7 @@ export function generationProgressPlugin(): Plugin {
           if (input.action === 'resume') await Promise.all(jobIds.map((id) => resumeGenerationJobDownload(id)));
 
           const reports = jobIds.map((id) => {
-            const job = jobs.get(id);
+            const job = visibleGenerationJob(id);
             return job ? report(job, input.action) : { jobId: id, operationId: id, status: 'not_found', error: 'generation job not found' };
           });
           sendJson(res, 200, { target: 'generation', action: input.action, reports });

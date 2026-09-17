@@ -1,6 +1,7 @@
 import { homedir } from 'node:os';
 import { isAbsolute, join, resolve } from 'node:path';
 import { readDataDirPointer } from './data-dir.ts';
+import { currentTenant } from './gateway/tenant-context.ts';
 
 export const DEV_PROFILE_ID_ENV = 'OPENCHATCUT_DEV_PROFILE_ID';
 export const DATA_DIR_ENV = 'OPENCHATCUT_DATA_DIR';
@@ -163,7 +164,14 @@ export function resolveRuntimeProfile(
 const activeProfile = resolveRuntimeProfile();
 
 export function runtimeProfile(): RuntimeProfile {
-  return activeProfile;
+  const tenant = currentTenant();
+  if (!tenant) return activeProfile;
+  const safe = tenant.userId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || 'anonymous';
+  const rootDir = join(homedir(), '.openchatcut', 'tenants', safe);
+  return resolveRuntimeProfile(
+    { OPENCHATCUT_DATA_DIR: rootDir },
+    { homeDir: homedir(), cwd: process.cwd() },
+  );
 }
 
 export function isIsolatedDevProfile(

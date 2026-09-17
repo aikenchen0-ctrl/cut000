@@ -15,6 +15,7 @@ import { handleMcpRequest, mcpTools } from '../external-agent/mcp.ts';
 import { exportJianyingDraft } from '../external-agent/jianying-export.ts';
 import { CONNECT_CLIENTS, connectExternalClient } from '../external-agent/client-connect.ts';
 import { claimBrowserProjectOwnership } from '../external-agent/project-edit-ownership.ts';
+import { publicMcpAllowed } from '../gateway/mcp-policy.ts';
 import {
   EDITOR_BOOTSTRAP_HEADER,
   configuredEditorOrigin,
@@ -113,6 +114,10 @@ export async function handleExternalAgentBridge(
     return;
   }
   if (write && url.pathname === '/connect-client') {
+    if (!publicMcpAllowed()) {
+      sendBridgeJson(res, 403, { ok: false, error: 'MCP is disabled on this public gateway' });
+      return;
+    }
     const body = await readBridgeJson(req);
     const client = body.client;
     const token = externalMcpToken();
@@ -137,8 +142,12 @@ export function externalAgentPlugin(): Plugin {
         });
       });
       server.middlewares.use('/api/external-mcp/mcp', (req, res) => {
+        if (!publicMcpAllowed()) {
+          sendBridgeJson(res, 403, { error: 'MCP is disabled on this public gateway' });
+          return;
+        }
         if (!externalMcpAuthorized(req)) {
-          sendBridgeJson(res, 401, { error: 'invalid OpenChatCut MCP token' });
+          sendBridgeJson(res, 401, { error: 'invalid cut000 MCP token' });
           return;
         }
         void handleMcpRequest(req, res, requestBaseUrl(req)).catch((error) => {

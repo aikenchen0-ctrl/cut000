@@ -124,7 +124,7 @@ export default {
   '停用': 'Off',
   '本地模型（whisper）': 'Local model (Whisper)',
   '转写在本机完成：免费、离线、素材不出本机。模型按需下载（见下方列表），自动选择设备优势后端：WebGPU 不可用时回退 CPU。本地转写不含说话人分离（全部归为同一位说话人）。':
-    'Transcription runs on this machine: free, offline, and private. Download models on demand below. OpenChatCut selects the best available backend and falls back to CPU when WebGPU is unavailable. Local transcription does not support speaker diarization.',
+    'Transcription runs on this machine: free, offline, and private. Download models on demand below. cut000 selects the best available backend and falls back to CPU when WebGPU is unavailable. Local transcription does not support speaker diarization.',
 
   // ──Page Note/Field Note──
   'MiniMax 同一个 Key，配置一次全能力（生图 / 配音 / 视频 / 音乐）通用。': 'One MiniMax key covers every capability (image / voice / video / music) — configure once.',
@@ -179,8 +179,8 @@ export default {
   'Codex 模型': 'Codex model',
   'Copilot 模型': 'Copilot model',
   'Copilot 默认模型': 'Copilot default model',
-  '使用 GitHub Copilot 订阅：官方 Copilot CLI 管理登录与凭据（终端运行 copilot login），OpenChatCut 通过 Copilot SDK 直接驱动编辑工具，不会读取或显示凭据。会话状态隔离在 ~/.openchatcut/copilot，不影响你自己的 ~/.copilot。':
-    'Use a GitHub Copilot subscription: the official Copilot CLI manages sign-in and credentials (run `copilot login` in a terminal). OpenChatCut drives the editing tools directly through the Copilot SDK and never reads or displays credentials. Session state is isolated in ~/.openchatcut/copilot and does not affect your own ~/.copilot.',
+  '使用 GitHub Copilot 订阅：官方 Copilot CLI 管理登录与凭据（终端运行 copilot login），cut000 通过 Copilot SDK 直接驱动编辑工具，不会读取或显示凭据。会话状态隔离在 ~/.openchatcut/copilot，不影响你自己的 ~/.copilot。':
+    'Use a GitHub Copilot subscription: the official Copilot CLI manages sign-in and credentials (run `copilot login` in a terminal). cut000 drives the editing tools directly through the Copilot SDK and never reads or displays credentials. Session state is isolated in ~/.openchatcut/copilot and does not affect your own ~/.copilot.',
   '登录后可读取当前订阅可用的模型，也可以手动填写模型 ID。仅支持工具调用的模型可用于编辑。':
     'After signing in, load the models available to this subscription or enter a model ID manually. Only tool-calling models can be used for editing.',
   'Codex 默认模型': 'Codex default model',
@@ -189,8 +189,8 @@ export default {
   '模型默认（{name}）': 'Model default ({name})',
   '读取模型后显示当前模型支持的档位；留空使用该模型的默认值。':
     'Load models to see the effort levels supported by the current model. Leave this unset to use the model default.',
-  '使用 ChatGPT 订阅登录，由官方 Codex CLI 管理凭据、续期与退出。OpenChatCut 不会读取或显示 OAuth 凭据。':
-    'Sign in with a ChatGPT subscription. The official Codex CLI manages credentials, renewal, and logout; OpenChatCut never reads or displays OAuth credentials.',
+  '使用 ChatGPT 订阅登录，由官方 Codex CLI 管理凭据、续期与退出。cut000 不会读取或显示 OAuth 凭据。':
+    'Sign in with a ChatGPT subscription. The official Codex CLI manages credentials, renewal, and logout; cut000 never reads or displays OAuth credentials.',
   '登录后可读取当前账号可用的模型，也可以手动填写模型 ID。':
     'After signing in, load the models available to this account or enter a model ID manually.',
   '状态未知': 'Status unknown',
@@ -264,8 +264,8 @@ export default {
   '已复制': 'Copied',
   'Codex 返回了无效的登录地址。': 'Codex returned an invalid sign-in URL.',
   'Codex 返回了无效的验证地址。': 'Codex returned an invalid verification URL.',
-  '内置 Agent 需要 Anthropic API Key。Claude Code 订阅用户请通过「外部 Agent 接入 (MCP)」连接；OpenChatCut 不接收 Claude OAuth。':
-    'The built-in Agent requires an Anthropic API key. Claude Code subscription users should connect through “External agents (MCP)”; OpenChatCut does not accept Claude OAuth.',
+  '内置 Agent 需要 Anthropic API Key。Claude Code 订阅用户请通过「外部 Agent 接入 (MCP)」连接；cut000 不接收 Claude OAuth。':
+    'The built-in Agent requires an Anthropic API key. Claude Code subscription users should connect through “External agents (MCP)”; cut000 does not accept Claude OAuth.',
   '复制失败': 'Copy failed',
   // ──Provider page status/test connection/field rendering──
   '已配置': 'Configured',
@@ -282,8 +282,8 @@ export default {
     'Sign in with the official Grok CLI in a terminal first, then import the login here:',
   '订阅（SuperGrok 或 X Premium+）登录成功后，grok login 会把会话写入本机。':
     'After signing in with your subscription (SuperGrok or X Premium+), grok login stores the session locally.',
-  '使用 SuperGrok 或 X Premium+ 订阅登录：官方 Grok CLI 管理登录与凭据（终端运行 grok login），OpenChatCut 导入会话并自动续期，不会读取或显示 OAuth 凭据。':
-    'Sign in with your SuperGrok or X Premium+ subscription: the official Grok CLI owns login and credentials (run grok login in a terminal); OpenChatCut imports the session and refreshes it automatically, and never reads or displays OAuth credentials.',
+  '使用 SuperGrok 或 X Premium+ 订阅登录：官方 Grok CLI 管理登录与凭据（终端运行 grok login），cut000 导入会话并自动续期，不会读取或显示 OAuth 凭据。':
+    'Sign in with your SuperGrok or X Premium+ subscription: the official Grok CLI owns login and credentials (run grok login in a terminal); cut000 imports the session and refreshes it automatically, and never reads or displays OAuth credentials.',
   'xAI · Grok (订阅登录)': 'xAI · Grok (Subscription sign-in)',
   '使用 xAI 订阅会话（SuperGrok / X Premium+，优先）或 LLM_XAI_API_KEY 生成图片。文生图：最多 4 张，1K / 2K。':
     'Generates images with your xAI subscription session (SuperGrok / X Premium+, preferred) or LLM_XAI_API_KEY. Text-to-image: up to 4 images, 1K / 2K.',
@@ -440,8 +440,8 @@ export default {
   '目标配置文件不是有效 JSON，为避免覆盖未写入。': 'Target config file is not valid JSON; nothing was written to avoid overwriting it.',
   '写入配置文件失败。': 'Failed to write the config file.',
   '执行 codex mcp add 失败。': 'Running codex mcp add failed.',
-  'OpenChatCut 暴露一个 Streamable HTTP MCP 端点。Claude Code / Codex / Cursor 等外部 Agent 接入后,与内置 Agent 共用同一套编辑工具,可直接读写当前工程。':
-    'OpenChatCut exposes a Streamable HTTP MCP endpoint. External agents such as Claude Code, Codex, and Cursor share the same editing tools as the built-in agent and can read and edit the current project directly.',
+  'cut000 暴露一个 Streamable HTTP MCP 端点。Claude Code / Codex / Cursor 等外部 Agent 接入后,与内置 Agent 共用同一套编辑工具,可直接读写当前工程。':
+    'cut000 exposes a Streamable HTTP MCP endpoint. External agents such as Claude Code, Codex, and Cursor share the same editing tools as the built-in agent and can read and edit the current project directly.',
   '端点地址': 'Endpoint',
   '内置 Agent 与外部 MCP': 'Built-in Agent vs external MCP',
   '内置 Agent 会先生成可预览的修改提案，由你应用或拒绝；外部 MCP 使用独立编辑会话，manual 模式等待审核，auto 模式在 review 时直接应用。两者都只通过 EditorCore 命令修改工程。':

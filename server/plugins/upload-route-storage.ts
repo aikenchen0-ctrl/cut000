@@ -16,6 +16,7 @@ import {
 import { deleteMediaReference } from '../media-references.ts';
 import { deleteMediaPreviewDerivatives } from './media-preview.ts';
 import { contentLengthOf, sendError, sendJson } from './upload-route-http.ts';
+import { releaseTenantUpload } from '../gateway/upload-quota.ts';
 
 type Logger = ViteDevServer['config']['logger'];
 type CloudState = 'ok' | 'off' | 'failed' | 'exists';
@@ -60,7 +61,12 @@ async function handleDeleteUpload(req: IncomingMessage, res: ServerResponse): Pr
       let removed = 0;
       let derivativesRemoved = 0;
       let r2Removed = false;
+      let releasedBytes = 0;
       const failures: unknown[] = [];
+      const local = resolveUploadFile(name);
+      if (local) {
+        try { releasedBytes = (await stat(local)).size; } catch { releasedBytes = 0; }
+      }
       for (const directory of uploadReadDirs()) {
         try {
           if (rollbackToken) {
@@ -101,8 +107,10 @@ async function handleDeleteUpload(req: IncomingMessage, res: ServerResponse): Pr
         r2Removed,
         derivativesRemoved,
         ownershipMatched: !rollbackToken || removed > 0 || r2Removed,
+        releasedBytes,
       };
     });
+    if (result.ownershipMatched && result.releasedBytes) await releaseTenantUpload(result.releasedBytes);
     sendJson(res, 200, result);
   } catch (error) {
     sendError(res, 500, error instanceof Error ? error.message : String(error));

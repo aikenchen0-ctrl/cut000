@@ -22,6 +22,11 @@ import {
   type UpdateGenerationJob,
 } from './generation-jobs.ts';
 import { TaskLimiter, type ReleaseTaskPermit } from '../task-limiter.ts';
+import {
+  acquireUserExportPermit,
+  assertUserExportQueue,
+  gatewayExportOwner,
+} from '../gateway/export-queue.ts';
 
 const DEFAULT_MAX_ACTIVE_EXPORTS = 1;
 const MAX_ACTIVE_EXPORTS = 4;
@@ -187,7 +192,23 @@ function acquireExportPermitWithSignal(signal: AbortSignal): Promise<ReleaseTask
 }
 
 export function acquireExportPermit(signal?: AbortSignal): Promise<ReleaseTaskPermit> {
-  return signal ? acquireExportPermitWithSignal(signal) : exportLimiter.acquire();
+  const owner = gatewayExportOwner();
+  if (!owner) {
+    return signal ? acquireExportPermitWithSignal(signal) : exportLimiter.acquire();
+  }
+  assertUserExportQueue(owner);
+  return (async () => {
+    const userRelease = await acquireUserExportPermit(owner, signal);
+    try {
+      const globalRelease = signal ? await acquireExportPermitWithSignal(signal) : await exportLimiter.acquire();
+      return () => {
+        try { globalRelease(); } finally { userRelease(); }
+      };
+    } catch (error) {
+      userRelease();
+      throw error;
+    }
+  })();
 }
 export function trackExportJobController(jobId: string, controller: AbortController): void {
   exportJobControllers.set(jobId, controller);
@@ -198,6 +219,7 @@ export function forgetExportJobController(jobId: string): void {
 }
 
 export async function cancelActiveExportJob(jobId: string): Promise<boolean> {
+  if (!getGenerationJobSnapshot(jobId)) return false;
   const controller = exportJobControllers.get(jobId);
   if (!controller) return false;
   controller.abort();

@@ -21,6 +21,7 @@ import {
   type ImportTokenScope,
 } from '../external-agent/import-token.ts';
 import { editorCredentialAuthorized } from '../editor-auth.ts';
+import { assertTenantUploadQuota, recordTenantUpload, TenantUploadQuotaError } from '../gateway/upload-quota.ts';
 import { scrubInternalPaths } from '../error-scrub.ts';
 import {
   contentLengthOf, extFromUrlOrType, maxUploadBytes, readBody,
@@ -66,6 +67,16 @@ async function handleUploadWrite(
     if (!extension) throw new Error('unsupported upload handoff media type');
     if (rejectDeclaredSize(req, res, maxBytes)) return;
     const declaredBytes = contentLengthOf(req);
+    try {
+      await assertTenantUploadQuota(declaredBytes ?? 1);
+    } catch (error) {
+      if (error instanceof TenantUploadQuotaError) {
+        req.resume();
+        sendError(res, 413, error.message);
+        return;
+      }
+      throw error;
+    }
     if (handoff && declaredBytes !== null && declaredBytes !== handoff.expectedBytes) {
       req.resume();
       sendError(res, 400, 'upload byte size does not match handoff');
@@ -86,6 +97,7 @@ async function handleUploadWrite(
     partPath = join(directory, `.${name}.${randomUUID()}.part`);
     finalPath = join(directory, name);
     const { bytes, contentHash } = await streamUploadToFile(req, partPath, maxBytes);
+    await assertTenantUploadQuota(bytes);
     if (handoff && bytes !== handoff.expectedBytes) {
       await unlink(partPath).catch(() => {});
       partPath = undefined;
@@ -98,6 +110,7 @@ async function handleUploadWrite(
       sendError(res, 400, 'empty body');
       return;
     }
+    let createdUpload = false;
     await enqueueUploadMutation(name, async () => {
       if (ifAbsent) {
         const rollbackToken = requestedRollbackToken || randomUUID();
@@ -174,6 +187,7 @@ async function handleUploadWrite(
             path, bytes, contentHash, fileKey: `uploads/${name}`,
             assetId: assetId || undefined, cloud, created: true, rollbackToken,
           });
+          createdUpload = true;
           removeCreatedLocal = false;
           createdLocalIdentity = undefined;
           removeCreatedR2 = false;
@@ -231,7 +245,9 @@ async function handleUploadWrite(
         filename: handoff?.filename,
         cloud, created: true, receipt,
       });
+      createdUpload = true;
     });
+    if (createdUpload) await recordTenantUpload(bytes);
   } catch (error) {
     const failures: unknown[] = [error];
     if (partPath) {
@@ -266,7 +282,7 @@ async function handleUploadWrite(
     // Full detail (paths included) stays in the server log; the client gets the
     // same sentence with host filesystem paths scrubbed.
     if (!res.headersSent) {
-      sendError(res, error instanceof UploadTooLargeError ? 413 : 500, scrubInternalPaths(message));
+      sendError(res, error instanceof UploadTooLargeError || error instanceof TenantUploadQuotaError ? 413 : 500, scrubInternalPaths(message));
     }
     else res.end();
   }
@@ -399,10 +415,12 @@ async function handleImportUrl(req: IncomingMessage, res: ServerResponse, logger
   const maxBytes = maxUploadBytes();
   try {
     const body = JSON.parse((await readBody(req)).toString('utf8') || '{}') as { url?: string; name?: string };
+    await assertTenantUploadQuota(1);
     const imported = await fetchRemoteImport(body, maxBytes, res);
     if (!imported) return;
     const saved = await saveRemoteImport(imported, maxBytes, logger, res);
     if (!saved) return;
+    await recordTenantUpload(saved.bytes);
     sendJson(res, 200, {
       ok: true, path: `/media/uploads/${saved.name}`, bytes: saved.bytes, contentHash: saved.contentHash,
       contentType: imported.contentType ?? undefined,
@@ -414,7 +432,7 @@ async function handleImportUrl(req: IncomingMessage, res: ServerResponse, logger
     const message = error instanceof Error ? error.message : String(error);
     logger.error(`[import-url] ${message}`);
     if (!res.headersSent) {
-      if (error instanceof UploadTooLargeError) sendError(res, 413, message);
+      if (error instanceof UploadTooLargeError || error instanceof TenantUploadQuotaError) sendError(res, 413, message);
       else sendJson(res, 200, {
         ok: false, error: message,
         ...(error instanceof ImportUnreachableError ? { code: error.code } : {}),

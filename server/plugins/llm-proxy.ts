@@ -10,6 +10,8 @@ import {
 import { resolveLlmProviderConfig } from '../llm-config.ts';
 import { xaiOauthAccessToken } from '../xai-oauth-session.ts';
 import { proxyMiddleware } from '../proxy.ts';
+import { gatewayEnabled, sub2apiBase } from '../gateway/config.ts';
+import { currentTenant } from '../gateway/tenant-context.ts';
 
 function keyReader(name: string): string {
   return getKey(name as KeyName);
@@ -21,10 +23,15 @@ export function llmProviderForRequest(req?: IncomingMessage): LlmProvider {
 }
 
 export function llmTarget(req?: IncomingMessage): string {
+  if (gatewayEnabled() && currentTenant()?.userApiKey) return `${sub2apiBase()}/v1`;
   return resolveLlmProviderConfig(llmProviderForRequest(req), keyReader).baseUrl;
 }
 
 export function llmHeaders(req?: IncomingMessage): Record<string, string> {
+  const tenantKey = currentTenant()?.userApiKey;
+  if (gatewayEnabled() && tenantKey) {
+    return { authorization: `Bearer ${tenantKey}` };
+  }
   const config = resolveLlmProviderConfig(llmProviderForRequest(req), keyReader);
   if (config.provider === 'xai-oauth') {
     // OAuth requests only trust the active in-memory session. API-key accounts

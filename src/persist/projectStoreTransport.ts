@@ -122,7 +122,7 @@ function postJson(
 async function requestHttp(request: ProjectStoreRequest): Promise<ProjectStoreResponse> {
   const headers: Record<string, string> = {};
   let path = '';
-  let init: RequestInit = { cache: 'no-store', headers };
+  let init: RequestInit = { cache: 'no-store', credentials: 'same-origin', headers };
   switch (request.operation) {
     case 'snapshot':
       break;
@@ -218,7 +218,7 @@ export function fetchWithEditorSession(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Response> {
-  return fetch(input, { ...init, cache: 'no-store' });
+  return fetch(input, { ...init, cache: 'no-store', credentials: 'same-origin' });
 }
 
 export function resetProjectStoreTransport(): void {

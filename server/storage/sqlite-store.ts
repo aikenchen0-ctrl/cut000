@@ -9,6 +9,7 @@ import { dirname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { projectIdFromProjectStoreKey } from '../../shared/project-store-validation.ts';
 import { runtimeProfile } from '../runtime-profile.ts';
+import { currentTenant } from '../gateway/tenant-context.ts';
 import {
   DELETED_PROJECTS_KV_KEY,
   GENERATION_JOBS_KV_KEY,
@@ -100,6 +101,7 @@ function authoritativeReceipt(): ImportReceipt | null {
  * initialization but cannot expose an incomplete database.
  */
 export function sqliteStoreEnabled(): boolean {
+  if (currentTenant()) return false;
   const env = process.env[SQLITE_STORE_ENV];
   if (env !== undefined && env !== '1') return false;
   const receipt = authoritativeReceipt();

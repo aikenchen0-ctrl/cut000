@@ -2,6 +2,9 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 import { projectStoreHttpAuthorized } from '../project-store-http-auth.ts';
 import { externalMcpAuthorized } from '../editor-auth.ts';
+import { gatewayEnabled } from '../gateway/config.ts';
+import { isGatewayAuthPath } from '../gateway/plugin.ts';
+import { publicMcpAllowed } from '../gateway/mcp-policy.ts';
 
 /**
  * Whether a state-changing request may proceed under the local-device trust
@@ -13,12 +16,13 @@ export function requestShapeAllowed(req: IncomingMessage): boolean {
   const method = (req.method ?? 'GET').toUpperCase();
   if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return true;
   const url = new URL(req.url ?? '/', 'http://localhost');
-  if (url.pathname === '/api/external-mcp/mcp' && externalMcpAuthorized(req)) return true;
+  if (gatewayEnabled() && isGatewayAuthPath(url.pathname)) return true;
+  if (url.pathname === '/api/external-mcp/mcp' && publicMcpAllowed() && externalMcpAuthorized(req)) return true;
   // Upload slots carry a single-use, short-lived handoff token that the
   // /upload endpoint verifies itself (scope-bound filename/size/content-type);
   // external MCP clients upload without an Origin header, so the token is
   // their only credential and must pass the shape gate to reach that check.
-  if (isHandoffUpload(req)) return true;
+  if (isHandoffUpload(req) && publicMcpAllowed()) return true;
   return projectStoreHttpAuthorized(req);
 }
 

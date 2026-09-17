@@ -41,12 +41,12 @@ function defaultBrowserProjectId(): string {
   if (!connected.length) {
     throw new ExternalEditorCallError(
       'rejected',
-      'No OpenChatCut editor is connected. Call target_project with an existing project id for offline editing, or open the editor.',
+      'No cut000 editor is connected. Call target_project with an existing project id for offline editing, or open the editor.',
     );
   }
   throw new ExternalEditorCallError(
     'rejected',
-    'Multiple OpenChatCut projects are open; call target_project with the intended project.',
+    'Multiple cut000 projects are open; call target_project with the intended project.',
   );
 }
 
@@ -119,7 +119,7 @@ export function bindBrowserForCall(
   }
   const binding = editorBinding(projectId);
   if (!binding || !editorBindingMatches(binding)) {
-    throw new ExternalEditorCallError('rejected', `Project ${projectId} is not open in a connected OpenChatCut editor.`);
+    throw new ExternalEditorCallError('rejected', `Project ${projectId} is not open in a connected cut000 editor.`);
   }
   session.binding = binding;
   return binding;

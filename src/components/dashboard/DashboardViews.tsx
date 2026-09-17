@@ -3,6 +3,7 @@ import type { ProjectMeta } from '../../persist/projectStoreCoordinators';
 import { theme } from '../../theme';
 import { useT } from '../../i18n/locale';
 import { DashboardHeaderLinks } from '../DashboardHeaderLinks';
+import { SessionBar } from '../../gateway/SessionBar';
 import { BrandMark, Icon, OpenChatCutWordmark } from '../icons';
 import { bindAction } from '../../shortcuts/actionRegistry';
 // Opened on demand, so they load on demand — see dashboardDialogs.tsx.
@@ -66,6 +67,7 @@ export function DashboardTitlebarContent({ model }: { model: DashboardModel }) {
       <span style={{ color: theme.textDim, fontSize: 13 }}>{t('· 我的工程')}</span>
       <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 2 }}>
         <DashboardHeaderLinks />
+        <SessionBar />
         <button onClick={() => model.setDialog('mcp', true)} data-tip={t('外部 Agent 接入 (MCP)')} aria-label={t('外部 Agent 接入 (MCP)')} className="cc-header-btn cc-tip cc-tip-r" style={settingsBtn}><Icon name="plug" size={16} /></button>
         <button onClick={() => model.setDialog('shortcuts', true)} data-tip={t('编辑快捷键')} aria-label={t('编辑快捷键')} className="cc-header-btn cc-tip cc-tip-r" style={settingsBtn}><Icon name="keyboard" size={16} /></button>
         <LocaleToggle />

@@ -118,6 +118,7 @@ function normalizePersistedJob(value: unknown): GenerationJob | null {
   const restored = !TERMINAL.has(row.status);
   return {
     id: row.id,
+    ownerUserId: typeof row.ownerUserId === 'string' ? row.ownerUserId : undefined,
     status: row.status,
     progress: row.progress,
     phase: restored ? 'recovering' : row.phase,

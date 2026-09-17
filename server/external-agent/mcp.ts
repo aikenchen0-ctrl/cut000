@@ -64,7 +64,7 @@ export const MCP_POST_BODY_LIMIT_BYTES = 2 * 1024 * 1024;
 
 const PROJECT_SELECTOR = {
   type: 'string',
-  description: 'OpenChatCut project id. It must match the project bound to this MCP transport session.',
+  description: 'cut000 project id. It must match the project bound to this MCP transport session.',
 };
 
 interface McpSession extends McpBindingSession {

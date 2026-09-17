@@ -105,6 +105,17 @@ export default defineConfig(({ mode }) => {
   // Electron embedded server) read the keystore through GETTERS, so a saved value
   // takes effect on the next request with no restart. The `const`s below are only the
   // startup snapshot for the `define` (initial agent capability manifest).
+  for (const name of [
+    'SUB2API_BASE',
+    'OCC_SESSION_SECRET',
+    'OCC_OPEN_REGISTER',
+    'OCC_SUB2API_KEY_NAME',
+    'OCC_PUBLIC_MCP',
+    'OCC_SECURE_COOKIE',
+  ] as const) {
+    const value = (env[name] ?? process.env[name] ?? '').trim();
+    if (value) process.env[name] = value;
+  }
   seedKeystore(env);
   const aaiKey = env.ASSEMBLYAI_API_KEY || '';
   const imageKey = env.IMAGE_API_KEY || env.OPENAI_API_KEY || '';
@@ -132,6 +143,7 @@ export default defineConfig(({ mode }) => {
     // ONLY — no key value is ever exposed to the browser.
     define: {
       __APP_VERSION__: JSON.stringify(appPackage.version),
+      __OCC_GATEWAY__: JSON.stringify(Boolean((env.SUB2API_BASE || process.env.SUB2API_BASE || '').trim())),
       __CONFIGURED_CAPS__: JSON.stringify({
         image: Boolean(imageKey || geminiKey || minimaxKey),
         voice: Boolean((doubaoAppId && doubaoAccessKey) || elevenKey || minimaxKey),
@@ -149,19 +161,23 @@ export default defineConfig(({ mode }) => {
     publicDir: 'public',
     plugins: [serveOrtWasmLoader(), react(), productAssetsPlugin(), excludeUserMediaFromBuild(), ...serverPlugins()],
     server: {
+      host: '127.0.0.1',
       port: 5199,
       strictPort: true,
+      open: false,
       // Pre-transform the editor entry graph at startup so the first tab
       // (and chat hydration) renders without a multi-second compile stall.
       warmup: {
-        clientFiles: ['/src/main.tsx'],
+        clientFiles: ['src/main.tsx'],
       },
       fs: {
         // Worktrees may symlink node_modules to the primary checkout. Keep
         // imported runtime assets (for example ONNX Runtime WASM) readable.
         allow: [searchForWorkspaceRoot(process.cwd()), realpathSync('node_modules')],
       },
-      open: '/',
+      watch: {
+        ignored: ['**/.env.local', '**/node_modules/**', '**/.git/**'],
+      },
       proxy: {
         // AssemblyAI transcription — key injected server-side (never in browser).
         '/assemblyai': {

@@ -9,6 +9,7 @@ import { ALL_LOCALES, getLocale, setLocale, useT } from '../i18n/locale';
 import { invokeAction, bindAction } from '../shortcuts/actionRegistry';
 import { DesktopWindowControls } from './DesktopWindowControls';
 import { TopBarIconButton } from './TopBarIconButton';
+import { SessionBar } from '../gateway/SessionBar';
 
 // Lazy, like the dashboard's copy of this dialog. A static import here put the
 // whole MCP guide into the editor's eager chunk and made every lazy() built on
@@ -99,6 +100,7 @@ export function TopBar({ projectId, projectName, canUndo, canRedo, exporting, ex
       {/* self-contained: trigger + popover, global export history, zero props */}
       <ExportHistory />
       <LocaleToggle />
+      <SessionBar />
       <TopBarIconButton icon="layoutPanel" label={t('切换面板布局')} onClick={() => invokeAction('toggle-layout', undefined, 'toolbar')} />
       <button onClick={() => invokeAction('open-export', undefined, 'toolbar')}
         className="cc-tip cc-tip-r"

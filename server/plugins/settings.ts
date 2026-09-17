@@ -25,6 +25,7 @@ import {
   writeDataDirPointer,
 } from '../data-dir.ts';
 import { sqliteStoreEnabled } from '../storage/sqlite-store.ts';
+import { gatewayEnabled } from '../gateway/config.ts';
 
 const ISOLATED_R2_SETTINGS = [
   'R2_ACCOUNT_ID',
@@ -152,6 +153,10 @@ export function settingsPlugin(): Plugin {
           // POST /api/keys/test: "Test connection" detection. overrides = unsaved temporary values of the panel,
           // Only this detection takes effect and does not fall into keystore / .env.local; the result will never contain the key value.
           if (req.method === 'POST' && req.url === '/test') {
+            if (gatewayEnabled()) {
+              sendJson(res, 403, { error: '公开网关禁止探测主机密钥' });
+              return;
+            }
             const body = await readBody(req);
             const page = typeof body.page === 'string' ? body.page : '';
             const overrides = body.overrides && typeof body.overrides === 'object' && !Array.isArray(body.overrides)
@@ -161,6 +166,10 @@ export function settingsPlugin(): Plugin {
             return;
           }
           if (req.method === 'POST') {
+            if (gatewayEnabled()) {
+              sendJson(res, 403, { error: '公开网关禁止修改主机密钥，模型走当前登录用户的 Sub2API 额度' });
+              return;
+            }
             const profile = runtimeProfile();
             const patch = await readBody(req);
             assertProfileSensitiveSettingsPatch(patch, profile);

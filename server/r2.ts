@@ -19,6 +19,7 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { getKey, type KeyName } from './keystore.ts';
 import { outboundHttpAgent } from './outbound-proxy.ts';
 import { isIsolatedDevProfile } from './runtime-profile.ts';
+import { r2UploadObjectKey } from './gateway/r2-key.ts';
 
 const MAX_SAFE_BYTES = Number.MAX_SAFE_INTEGER;
 /** Finite default: large enough for long-form source masters while bounding disk/R2 abuse. */
@@ -135,7 +136,7 @@ export async function putUploadObject(
   try {
     await clientFor(cfg).send(new PutObjectCommand({
       Bucket: cfg.bucket,
-      Key: `uploads/${name}`,
+      Key: r2UploadObjectKey(name),
       Body: body,
       ContentType: contentType || 'application/octet-stream',
       ...(typeof contentLength === 'number' && contentLength >= 0
@@ -179,7 +180,7 @@ export async function deleteUploadObject(name: string, rollbackToken?: string): 
   if (!rollbackToken) {
     await clientFor(cfg).send(new DeleteObjectCommand({
       Bucket: cfg.bucket,
-      Key: `uploads/${name}`,
+      Key: r2UploadObjectKey(name),
     }));
     return true;
   }
@@ -187,7 +188,7 @@ export async function deleteUploadObject(name: string, rollbackToken?: string): 
   try {
     const head = await clientFor(cfg).send(new HeadObjectCommand({
       Bucket: cfg.bucket,
-      Key: `uploads/${name}`,
+      Key: r2UploadObjectKey(name),
     }));
     if (head.Metadata?.['openchatcut-import-token'] !== rollbackToken) return false;
     etag = head.ETag;
@@ -199,7 +200,7 @@ export async function deleteUploadObject(name: string, rollbackToken?: string): 
   try {
     await clientFor(cfg).send(new DeleteObjectCommand({
       Bucket: cfg.bucket,
-      Key: `uploads/${name}`,
+      Key: r2UploadObjectKey(name),
       IfMatch: etag,
     }));
     return true;
@@ -226,7 +227,7 @@ export async function getUploadObject(name: string): Promise<R2Object | null> {
   const cfg = r2Config();
   if (!cfg) return null;
   try {
-    const res = await clientFor(cfg).send(new GetObjectCommand({ Bucket: cfg.bucket, Key: `uploads/${name}` }));
+    const res = await clientFor(cfg).send(new GetObjectCommand({ Bucket: cfg.bucket, Key: r2UploadObjectKey(name) }));
     const bytes = await res.Body?.transformToByteArray();
     if (!bytes) return null;
     const body = Buffer.from(bytes);
@@ -282,7 +283,7 @@ async function deleteOversizedUploadObject(
     try {
       const head = await (options?.client ?? clientFor(cfg)).send(new HeadObjectCommand({
         Bucket: cfg.bucket,
-        Key: `uploads/${name}`,
+        Key: r2UploadObjectKey(name),
       }));
       if (typeof head.ContentLength === 'number' && head.ContentLength <= maxBytes) return false;
       etag = head.ETag;
@@ -295,7 +296,7 @@ async function deleteOversizedUploadObject(
   try {
     await (options?.client ?? clientFor(cfg)).send(new DeleteObjectCommand({
       Bucket: cfg.bucket,
-      Key: `uploads/${name}`,
+      Key: r2UploadObjectKey(name),
       IfMatch: etag,
     }));
     return true;
@@ -340,7 +341,7 @@ export async function getUploadObjectToFile(
   try {
     signal?.throwIfAborted();
     const res = await (options?.client ?? clientFor(cfg)).send(
-      new GetObjectCommand({ Bucket: cfg.bucket, Key: `uploads/${name}` }),
+      new GetObjectCommand({ Bucket: cfg.bucket, Key: r2UploadObjectKey(name) }),
       { abortSignal: signal },
     );
     signal?.throwIfAborted();
@@ -410,7 +411,7 @@ export async function presignPutUpload(
 ): Promise<PresignedUpload | null> {
   const cfg = r2Config();
   if (!cfg || !r2PresignEnabled()) return null;
-  const key = `uploads/${name}`;
+  const key = r2UploadObjectKey(name);
   const cmd = new PutObjectCommand({
     Bucket: cfg.bucket,
     Key: key,
@@ -433,7 +434,7 @@ export async function presignGetUpload(
 ): Promise<{ downloadUrl: string; fileKey: string; expiresIn: number } | null> {
   const cfg = r2Config();
   if (!cfg || !r2PresignEnabled()) return null;
-  const key = `uploads/${name}`;
+  const key = r2UploadObjectKey(name);
   const cmd = new GetObjectCommand({ Bucket: cfg.bucket, Key: key });
   const downloadUrl = await getSignedUrl(clientFor(cfg), cmd, { expiresIn });
   return { downloadUrl, fileKey: key, expiresIn };

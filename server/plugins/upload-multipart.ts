@@ -11,6 +11,7 @@ import { uploadDir } from '../media-dir.ts';
 import { maxUploadBytes } from './upload.ts';
 import { assembleHashedParts } from './upload-multipart-assembly.ts';
 import { editorCredentialAuthorized } from '../editor-auth.ts';
+import { assertTenantUploadQuota, recordTenantUpload, TenantUploadQuotaError } from '../gateway/upload-quota.ts';
 import {
   loadMeta,
   MAX_PARTS,
@@ -243,6 +244,15 @@ export function uploadMultipartPlugin(): Plugin {
             sendError(res, 413, `file too large (max ${Math.round(max / (1024 ** 3))}GB)`);
             return;
           }
+          try {
+            await assertTenantUploadQuota(size);
+          } catch (error) {
+            if (error instanceof TenantUploadQuotaError) {
+              sendError(res, 413, error.message);
+              return;
+            }
+            throw error;
+          }
           if (size > limits.maxBytes || usage.sessions + pendingSessions >= limits.maxSessions
             || usage.bytes > limits.maxBytes
             || pendingBytes > limits.maxBytes - usage.bytes
@@ -441,6 +451,7 @@ export function uploadMultipartPlugin(): Plugin {
             bytes: Math.max(0, usage.bytes - meta.size),
             sessions: Math.max(0, usage.sessions - 1),
           };
+          await recordTenantUpload(bytes);
           sendJson(res, 200, {
             path: `/media/uploads/${fname}`,
             bytes,

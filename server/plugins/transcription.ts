@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 
 import { editorCredentialAuthorized } from '../editor-auth.ts';
+import { withUserTranscriptionPermit } from '../gateway/transcribe-queue.ts';
 
 import {
   assertTranscriptionProviderConfigured,
@@ -121,7 +122,9 @@ async function handleTranscription(
     assertDeclaredAudioSize(req);
     assertTranscriptionProviderConfigured(options, provider);
     const audio = await readAudio(req);
-    const result = await transcribeCloudAudio(options, { provider, language, diarize, audio });
+    const result = await withUserTranscriptionPermit(
+      () => transcribeCloudAudio(options, { provider, language, diarize, audio }),
+    );
     sendJson(res, 200, result);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

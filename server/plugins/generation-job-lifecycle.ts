@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import { gatewayEnabled } from '../gateway/config.ts';
+import { currentTenant } from '../gateway/tenant-context.ts';
 import { ResultDownloadError } from './result-download.ts';
 import {
   TERMINAL,
@@ -30,6 +32,25 @@ import {
   resumers,
   scheduleExpiry,
 } from './generation-job-store.ts';
+
+
+function callerUserId(): string | undefined {
+  if (!gatewayEnabled()) return undefined;
+  return currentTenant()?.userId;
+}
+
+export function jobOwnedByCaller(job: GenerationJob | undefined): job is GenerationJob {
+  if (!job) return false;
+  if (!gatewayEnabled()) return true;
+  const caller = callerUserId();
+  if (!caller) return false;
+  return job.ownerUserId === caller;
+}
+
+export function visibleGenerationJob(jobId: string): GenerationJob | undefined {
+  const job = jobs.get(jobId);
+  return jobOwnedByCaller(job) ? job : undefined;
+}
 
 let loadPromise: Promise<void> | undefined;
 
@@ -169,10 +190,14 @@ export async function createGenerationJob(
   await cleanOldJobs();
   const id = options.operationId?.trim() || randomUUID();
   const existing = jobs.get(id);
-  if (existing) return { operationId: id, jobId: id, status: 'queued' };
+  if (existing) {
+    if (!jobOwnedByCaller(existing)) throw new Error('operation id already in use');
+    return { operationId: id, jobId: id, status: 'queued' };
+  }
   const now = Date.now();
   const job: GenerationJob = {
     id,
+    ownerUserId: callerUserId(),
     status: 'queued',
     progress: 0,
     phase: 'queued',
@@ -210,7 +235,7 @@ export async function createGenerationJob(
 export async function waitForGenerationAcceptance(operationId: string): Promise<GenerationAcceptance> {
   await initializeGenerationJobs();
   const job = jobs.get(operationId);
-  if (!job) throw new Error(`generation operation not found: ${operationId}`);
+  if (!jobOwnedByCaller(job)) throw new Error(`generation operation not found: ${operationId}`);
   if (job.timestamps.acceptedAt) return acceptanceOf(job);
   if (job.status === 'failed') throw new Error(job.error ?? 'generation provider rejected the request');
   if (!job.acceptance) job.acceptance = makeAcceptanceWaiter();
@@ -272,7 +297,7 @@ export async function resumeRestoredJobs(): Promise<void> {
 export async function resumeGenerationJobDownload(jobId: string): Promise<boolean> {
   await initializeGenerationJobs();
   const job = jobs.get(jobId);
-  if (!job || job.status !== 'failed') return false;
+  if (!jobOwnedByCaller(job) || job.status !== 'failed') return false;
   if ((!job.resumeDownload || !job.pendingDownloadUrl) && await resumeWithRegisteredHandler(job)) return true;
   if (!job.resumeDownload || !job.pendingDownloadUrl) return false;
   clearTimeout(job.expiryTimer);
@@ -299,9 +324,11 @@ export async function resumeGenerationJobDownload(jobId: string): Promise<boolea
 
 export function getGenerationJobSnapshot(jobId: string): GenerationJobSnapshot | undefined {
   const job = jobs.get(jobId);
-  return job ? snapshotOf(job) : undefined;
+  return jobOwnedByCaller(job) ? snapshotOf(job) : undefined;
 }
 
 export function deleteGenerationJob(jobId: string): Promise<boolean> {
+  const job = jobs.get(jobId);
+  if (!jobOwnedByCaller(job)) return Promise.resolve(false);
   return evictTerminalJob(jobId);
 }

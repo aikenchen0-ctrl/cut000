@@ -5,6 +5,8 @@ import type { EditorBootstrapInfo } from '../shared/editor-auth-transport.ts';
 import { isLoopbackAddress } from './loopback-address.ts';
 import { loadOrCreateMcpToken } from './mcp-token.ts';
 import { runtimeProfile } from './runtime-profile.ts';
+import { gatewayEnabled } from './gateway/config.ts';
+import { currentTenant } from './gateway/tenant-context.ts';
 
 export const EDITOR_BOOTSTRAP_HEADER = 'x-openchatcut-editor-bootstrap';
 
@@ -83,6 +85,7 @@ function requestEditorOrigin(req: IncomingMessage): string | null {
 }
 
 export function trustedEditorRequest(req: IncomingMessage, requireOrigin: boolean): boolean {
+  if (gatewayEnabled()) return Boolean(currentTenant());
   if (!isLoopbackAddress(req.socket.remoteAddress)) return false;
   const expected = requestEditorOrigin(req);
   if (!expected) return false;
@@ -99,6 +102,7 @@ export function trustedEditorRequest(req: IncomingMessage, requireOrigin: boolea
  *  authorized purely by the loopback + Origin request shape: any page served
  *  from the local editor may call them. No credential handshake is needed. */
 export function editorCredentialAuthorized(req: IncomingMessage, requireOrigin: boolean): boolean {
+  if (gatewayEnabled()) return Boolean(currentTenant());
   return trustedEditorRequest(req, requireOrigin);
 }
 

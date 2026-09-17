@@ -1,6 +1,8 @@
 import type { IncomingMessage } from 'node:http';
 import { runtimeProfile, type RuntimeProfile } from './runtime-profile.ts';
 import { isLoopbackAddress } from './loopback-address.ts';
+import { gatewayEnabled } from './gateway/config.ts';
+import { sessionFromRequest } from './gateway/session.ts';
 
 /**
  * Local-device trust model (no shared secrets).
@@ -22,6 +24,9 @@ import { isLoopbackAddress } from './loopback-address.ts';
  * session state: any loopback editor tab is fully trusted, exactly like
  * Vite/webpack-dev-server local tooling. Reads additionally allow direct
  * local navigation without an Origin header.
+ *
+ * When SUB2API_BASE is set, loopback trust is replaced by an OCC session
+ * cookie issued after Sub2API login.
  */
 
 export function projectStoreAuthDir(profile: RuntimeProfile = runtimeProfile()): string {
@@ -67,11 +72,15 @@ function browserEnforcedRequest(req: IncomingMessage): boolean {
 /** Read-only access: loopback requests from same-origin pages (or direct
  *  local navigation) may read the active runtime profile's project library. */
 export function projectStoreReadAuthorized(req: IncomingMessage): boolean {
+  if (gatewayEnabled()) return Boolean(sessionFromRequest(req)) && browserEnforcedRequest(req);
   return trustedLoopback(req) && browserEnforcedRequest(req);
 }
 
 /** Write access: loopback, same-origin, browser-enforced requests only. */
 export function projectStoreHttpAuthorized(req: IncomingMessage): boolean {
+  if (gatewayEnabled()) {
+    return Boolean(sessionFromRequest(req)) && browserEnforcedRequest(req) && sameOrigin(req);
+  }
   return trustedLoopback(req) && browserEnforcedRequest(req) && sameOrigin(req);
 }
 

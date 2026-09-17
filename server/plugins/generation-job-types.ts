@@ -103,6 +103,7 @@ export interface AcceptanceWaiter {
 
 export interface GenerationJob {
   id: string;
+  ownerUserId?: string;
   status: GenerationJobStatus;
   progress: number;
   phase?: string;
@@ -141,6 +142,7 @@ export interface GenerationJob {
 export interface GenerationJobSnapshot {
   id: string;
   operationId: string;
+  ownerUserId?: string;
   status: GenerationJobStatus;
   progress: number;
   phase?: string;
@@ -235,6 +237,7 @@ export function snapshotOf(job: GenerationJob): GenerationJobSnapshot {
   return {
     id: job.id,
     operationId: job.id,
+    ownerUserId: job.ownerUserId,
     status: job.status,
     progress: job.progress,
     phase: job.phase,
