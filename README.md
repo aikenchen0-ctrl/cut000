@@ -1,37 +1,32 @@
 <p align="center">
-  <img src="public/openchatcut-icon.png" width="96" alt="OpenChatCut" />
+  <img src="public/openchatcut-icon.png" width="96" alt="cut000" />
 </p>
 
-<h1 align="center">OpenChatCut</h1>
+<h1 align="center">cut000</h1>
 
 <p align="center">
   <a href="README_ZH.md">简体中文</a> · <strong>English</strong>
 </p>
 
 <p align="center">
-  <strong>Open-source ChatCut alternative · agent-native · local-first AI video editor</strong>
+  <strong>Open-source · agent-native · local-first AI video editor</strong>
 </p>
 
 <p align="center">
   Let Codex, Claude Code, and the built-in agent read, edit, and export real video projects that remain fully editable.
-  Website: <a href="https://openchatcut.com">openchatcut.com</a>
 </p>
 
 <p align="center">
-  <a href="#what-is-openchatcut">Introduction</a> ·
+  <a href="#what-is-cut000">Introduction</a> ·
   <a href="#product-tour">Product Tour</a> ·
   <a href="#quick-start">Quick Start</a> ·
-  <a href="#using-openchatcut-with-codex--claude-code">Agent / MCP</a> ·
-  <a href="#community">Community</a> ·
-  <a href="#sponsors">Sponsors</a> ·
+  <a href="#using-cut000-with-codex--claude-code">Agent / MCP</a> ·
   <a href="#changelog">Changelog</a> ·
-  <a href="#star-growth">Star Growth</a> ·
   <a href="#contributing">Contributing</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/0xsline/OpenChatCut"><img alt="GitHub Repository" src="https://img.shields.io/badge/GitHub-Repository-181717?style=flat&logo=github" /></a>
-  <a href="https://discord.gg/bSGUAeWYkh"><img alt="Discord Community" src="https://img.shields.io/badge/Discord-Join_Community-5865F2?style=flat&logo=discord&logoColor=white" /></a>
+  <a href="https://github.com/aikenchen0-ctrl/cut000"><img alt="GitHub Repository" src="https://img.shields.io/badge/GitHub-Repository-181717?style=flat&logo=github" /></a>
   <img alt="Status" src="https://img.shields.io/badge/status-active_development-FF8A3D?style=flat" />
   <img alt="Local First" src="https://img.shields.io/badge/data-local_first-111827?style=flat" />
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-6-3178C6?style=flat&logo=typescript&logoColor=white" />
@@ -39,15 +34,6 @@
   <img alt="Remotion" src="https://img.shields.io/badge/Remotion-4-0B84F3?style=flat" />
   <img alt="Electron" src="https://img.shields.io/badge/Electron-43-47848F?style=flat&logo=electron&logoColor=white" />
   <img alt="MCP" src="https://img.shields.io/badge/MCP-Agent_native-7C3AED?style=flat" />
-  <a href="https://atomgit.com/Oxsline/openchatcut"><img alt="AtomGit G-Star" src="https://img.shields.io/badge/AtomGit-G--Star-DA203E?logo=gitcode&logoColor=white" /></a>
-</p>
-
-<p align="center">
-  <a href="https://linux.do" alt="LINUX DO"><img src="https://shorturl.at/ggSqS" /></a>
-</p>
-
-<p align="center">
-  <a href="https://www.producthunt.com/products/openchatcut?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-openchatcut" target="_blank" rel="noopener noreferrer"><img alt="OpenChatCut - Open-source AI agent video editor with a real timeline | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1201995&amp;theme=light&amp;t=1784645557617" /></a>
 </p>
 
 <p align="center">
@@ -58,34 +44,7 @@
   <sub>From a single instruction to a real timeline: agents, media, previews, motion graphics, transitions, effects, and multitrack audio all work together in one project.</sub>
 </p>
 
----
-## Sponsors
-
-<p align="center">
-  <a href="https://ofox.ai/?utm_source=github&utm_medium=sponsorship&utm_content=openchatcut"><img src="assets/readme-pic/ofox-logo.svg" width="300" alt="OfoxAI" /></a>
-</p>
-
-**OfoxAI: Text, image, and video AI in one platform**
-
-OfoxAI is a unified API platform for text, image, and video AI, with video models from the Seedance, MiniMax (Hailuo), and Wan families. Choose models for AI applications, agents, creative ideation, image generation, and video assets through one platform.
-[Explore OfoxAI models and APIs →](https://ofox.ai/?utm_source=github&utm_medium=sponsorship&utm_content=openchatcut)
-
-<br />
-
-If OpenChatCut helps you, you can support its continued development on Ko-fi or Afdian.
-
-<p align="center">
-  <a href="https://ko-fi.com/Y5N2241IP5">
-    <img alt="Support me on Ko-fi" src="https://img.shields.io/badge/Support_me_on-Ko--fi-72a4f2?logo=kofi&amp;logoColor=white" />
-  </a>
-  <a href="https://www.ifdian.net/a/sline?utm_source=copylink&amp;utm_medium=link">
-    <img alt="Support OpenChatCut on Afdian" src="https://img.shields.io/badge/Support_on-Afdian-946CE6" />
-  </a>
-</p>
-
----
-
-## What is OpenChatCut?
+## What is cut000?
 
 OpenChatCut is an **open-source ChatCut alternative**: a video editor that brings **conversational agents** and **professional timeline editing** into the same workspace. It is independent open source (AGPL), not affiliated with the commercial ChatCut product.
 
@@ -546,36 +505,3 @@ This list covers the project's major technical foundations. It does not replace 
 ## Changelog
 
 See the bilingual [`CHANGELOG.md`](CHANGELOG.md) for notable changes, or browse all published packages on [GitHub Releases](https://github.com/0xsline/OpenChatCut/releases).
-
----
-
-## Star Growth
-
-<p align="center">
-  <a href="https://www.star-history.com/?type=date&repos=0xsline%2FOpenChatCut">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=0xsline/OpenChatCut&type=date&theme=dark&legend=top-left&sealed_token=KKfeYtGGCjyG1QN9_Ev6Tvyyrcp5LW6bzOT8ZKED1EE0qNRqM3KrThzzbXWdcP6K-sr3vKbmoFZYDviSMtf8SI5UqAPYQf9v8qXCpM04S2C4LQTAKPbexT66SI3Q8pcHJJoMT7VCZnGp93LqIXZchAyYfTMmKy_y_LFOJ-_ruEq8GP1kVESXshaFzJfC" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=0xsline/OpenChatCut&type=date&legend=top-left&sealed_token=KKfeYtGGCjyG1QN9_Ev6Tvyyrcp5LW6bzOT8ZKED1EE0qNRqM3KrThzzbXWdcP6K-sr3vKbmoFZYDviSMtf8SI5UqAPYQf9v8qXCpM04S2C4LQTAKPbexT66SI3Q8pcHJJoMT7VCZnGp93LqIXZchAyYfTMmKy_y_LFOJ-_ruEq8GP1kVESXshaFzJfC" />
-      <img alt="OpenChatCut Star History Chart" src="https://api.star-history.com/chart?repos=0xsline/OpenChatCut&type=date&legend=top-left&sealed_token=KKfeYtGGCjyG1QN9_Ev6Tvyyrcp5LW6bzOT8ZKED1EE0qNRqM3KrThzzbXWdcP6K-sr3vKbmoFZYDviSMtf8SI5UqAPYQf9v8qXCpM04S2C4LQTAKPbexT66SI3Q8pcHJJoMT7VCZnGp93LqIXZchAyYfTMmKy_y_LFOJ-_ruEq8GP1kVESXshaFzJfC" />
-    </picture>
-  </a>
-</p>
-
----
-
-## License
-
-OpenChatCut is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE).
-Third-party components and assets remain subject to their respective licenses.
-
----
-
-
-## Contributing
-
-1. Create a branch from `main`.
-2. Add an executable check for non-trivial logic.
-3. Run `npm test`, `npm run lint`, and `npm run build` before committing.
-4. Open a Pull Request and include screenshots or acceptance evidence for UI or video-behavior changes.
-
-Use [GitHub Issues](https://github.com/0xsline/OpenChatCut/issues) for bug reports and feature requests.
